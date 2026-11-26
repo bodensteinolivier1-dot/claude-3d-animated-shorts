@@ -38,13 +38,38 @@ export default async function story(ctx) {
   const BLINKABLE = { calm: 'calm_b', calm_t: 'calm_tb', smug: 'smug_b', serious: 'calm_b', listen: 'calm_b' };
 
   // ---------- cast ----------
-  const KEV = OUTF[0], DAVE = OUTF[1], THUA = thua, TI = ti, GREEN = ex[4];
+  const KEV = OUTF[0], THUA = thua, TI = ti, GREEN = ex[4];
+  const DAVE = SR.build({ ...base, jacket: '#2f3542', jacket2: '#1f2430', pattern: ['vest', '#252a35'], details: ['tie', 'vestBtn', 'hanky'], tieCol: '#c8352f', hankyCol: '#f2cf2c', glasses: true });
+  DAVE.root.scale.setScalar(0.8); DAVE.phase = 2.37; DAVE.root.rotation.order = 'YXZ'; face(DAVE, 'calm'); DAVE.tint = DAVE.hm.material.uniforms.base.value.clone(); ALL.push(DAVE);
   const XS = [SR.build({ ...base, jacket: '#e8442a', jacket2: '#b8321f', details: ['polo'], collarCol: '#ffffff', logoCol: '#f2cf2c' }),
     SR.build({ ...base, jacket: '#8a5cd6', jacket2: '#6a40b0', details: ['hoodie'], hat: 'cap', hatCol: '#f27fb2', capBack: true }),
     SR.build({ ...base, jacket: '#2fb3a6', jacket2: '#1f8379', pattern: ['stripes', '#ffffff'], details: ['bow'], tieCol: '#f2cf2c' }),
     SR.build({ ...base, jacket: '#f2cf2c', jacket2: '#c9a516', pattern: ['dots', '#ff7a59'], details: ['collar'], collarCol: '#3d7be0' })];
   XS.forEach((c, i) => { c.root.scale.setScalar(0.8); c.phase = 5 + i * 0.53; c.root.rotation.order = 'YXZ'; face(c, 'calm'); c.tint = c.hm.material.uniforms.base.value.clone(); ALL.push(c); });
   const [XR, XP, XT, XY] = XS;
+  // ---- hair, hats and scarves (RicksClips-style: every character gets a signature silhouette) ----
+  const R0 = base.headR || 0.3;
+  const mat = (c) => new THREE.MeshStandardMaterial({ color: c, roughness: 0.75 });
+  const inkM = new THREE.MeshBasicMaterial({ color: '#2a1612', side: THREE.BackSide });
+  const part = (geo, col, pos = [0, 0, 0], rot = [0, 0, 0], scl = [1, 1, 1], ink = 0.06) => { const m = new THREE.Mesh(geo, mat(col)); m.position.set(...pos); m.rotation.set(...rot); m.scale.set(...scl); m.castShadow = true;
+    if (ink) { const h = new THREE.Mesh(geo, inkM); h.scale.setScalar(1 + ink); m.add(h); } return m; };
+  const dome = (col, theta = 1.1, k = 1.05) => part(new THREE.SphereGeometry(R0 * k, 40, 20, 0, Math.PI * 2, 0, theta), col, [0, 0, 0], [-0.32, 0, 0], [1.06, 1, 1.02], 0.035);
+  const wear = (c, ...parts) => { const g = new THREE.Group(); parts.forEach(p => g.add(p)); c.head.add(g); return g; };
+  // Dave: slick side-part
+  wear(DAVE, dome('#3b2a20', 1.0), part(new THREE.SphereGeometry(R0 * 0.42, 20, 12), '#3b2a20', [R0 * 0.35, R0 * 0.78, R0 * 0.38], [0, 0, -0.5], [1.4, 0.45, 0.9], 0.08));
+  // Ti: hair bun + hairband
+  wear(TI, dome('#5a3420', 1.15), part(new THREE.SphereGeometry(R0 * 0.38, 20, 14), '#5a3420', [0, R0 * 1.05, -R0 * 0.4]), part(new THREE.TorusGeometry(R0 * 0.24, R0 * 0.07, 8, 20), '#e8442a', [0, R0 * 0.86, -R0 * 0.3], [1.1, 0, 0], [1, 1, 1], 0.12));
+  // Green coworker: red beanie with pom-pom
+  wear(GREEN, dome('#e8442a', 1.25, 1.08), part(new THREE.TorusGeometry(R0 * 1.0, R0 * 0.13, 10, 36), '#ffffff', [0, R0 * 0.25, -R0 * 0.08], [Math.PI / 2 - 0.32, 0, 0], [1.06, 1.02, 1], 0.05), part(new THREE.SphereGeometry(R0 * 0.22, 16, 12), '#ffffff', [0, R0 * 1.1, -R0 * 0.35]));
+  // red-polo coworker: spiky black hair
+  wear(XR, dome('#1f1a1c', 1.05), ...[-0.5, -0.25, 0, 0.25, 0.5].map((a, i) => part(new THREE.ConeGeometry(R0 * 0.16, R0 * 0.5, 8), '#1f1a1c', [Math.sin(a) * R0 * 0.75, R0 * 0.95 - Math.abs(a) * R0 * 0.25, -R0 * 0.15 + (i % 2) * R0 * 0.12], [-0.35, 0, -a * 1.2], [1, 1, 1], 0.1)));
+  // yellow coworker: ginger ponytail
+  wear(XY, dome('#c8642a', 1.15), part(new THREE.SphereGeometry(R0 * 0.3, 18, 12), '#c8642a', [0, R0 * 0.45, -R0 * 1.1], [0.6, 0, 0], [0.8, 1.6, 0.8]), part(new THREE.TorusGeometry(R0 * 0.12, R0 * 0.05, 8, 16), '#3d7be0', [0, R0 * 0.78, -R0 * 0.92], [0.9, 0, 0], [1, 1, 1], 0.12));
+  // teal coworker: beret
+  wear(XT, part(new THREE.CylinderGeometry(R0 * 1.0, R0 * 0.85, R0 * 0.22, 28), '#2b3a67', [R0 * 0.1, R0 * 0.85, -R0 * 0.05], [-0.25, 0, -0.18], [1, 1, 1], 0.05), part(new THREE.SphereGeometry(R0 * 0.07, 8, 6), '#2b3a67', [R0 * 0.1, R0 * 1.0, -R0 * 0.08]));
+  // scarves on the people who feel the cold most
+  for (const [c, col, col2] of [[THUA, '#2fa36b', '#ffffff'], [XY, '#e8442a', '#f2cf2c']]) { const sc = new THREE.Group(); sc.add(part(new THREE.TorusGeometry(R0 * 0.55, R0 * 0.16, 10, 24), col, [0, 0, 0], [Math.PI / 2, 0, 0], [1, 1, 0.9], 0.06));
+    sc.add(part(new THREE.BoxGeometry(R0 * 0.22, R0 * 0.6, R0 * 0.08), col2, [R0 * 0.25, -R0 * 0.35, R0 * 0.5], [0.15, 0, 0.12], [1, 1, 1], 0.08)); sc.position.set(0, -R0 * 0.95, 0); c.head.add(sc); }
   const CAST = [KEV, DAVE, THUA, TI, GREEN, ...XS];
   const ZB = Z - 6, ZD = Z - 2.9, CHZ = ZD - 0.55;
   const DX = 1.45;   // Dave's spot at the whiteboard (left end, chart on his left-hand side)
