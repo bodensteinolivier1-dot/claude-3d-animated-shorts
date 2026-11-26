@@ -1,0 +1,625 @@
+{
+ "duration": 44.57,
+ "lines": [
+  {
+   "id": "hook",
+   "text": "This man opened every window in the office... in the middle of January.",
+   "start": 0.3,
+   "end": 4.44,
+   "words": [
+    {
+     "w": "This",
+     "t": 0.3
+    },
+    {
+     "w": "man",
+     "t": 0.5
+    },
+    {
+     "w": "opened",
+     "t": 0.7
+    },
+    {
+     "w": "every",
+     "t": 1.208
+    },
+    {
+     "w": "window",
+     "t": 1.716
+    },
+    {
+     "w": "in",
+     "t": 2.07
+    },
+    {
+     "w": "the",
+     "t": 2.27
+    },
+    {
+     "w": "office...",
+     "t": 2.47
+    },
+    {
+     "w": "in",
+     "t": 2.978
+    },
+    {
+     "w": "the",
+     "t": 3.178
+    },
+    {
+     "w": "middle",
+     "t": 3.378
+    },
+    {
+     "w": "of",
+     "t": 3.732
+    },
+    {
+     "w": "January.",
+     "t": 3.932
+    }
+   ]
+  },
+  {
+   "id": "freeze",
+   "text": "His coworkers were freezing.",
+   "start": 4.66,
+   "end": 6.116,
+   "words": [
+    {
+     "w": "His",
+     "t": 4.66
+    },
+    {
+     "w": "coworkers",
+     "t": 4.866
+    },
+    {
+     "w": "were",
+     "t": 5.388
+    },
+    {
+     "w": "freezing.",
+     "t": 5.752
+    }
+   ]
+  },
+  {
+   "id": "mock",
+   "text": "Dave said, \"Close it, Kevin. We're not penguins.\"",
+   "start": 6.336,
+   "end": 9.067,
+   "words": [
+    {
+     "w": "Dave",
+     "t": 6.336
+    },
+    {
+     "w": "said,",
+     "t": 6.744
+    },
+    {
+     "w": "\"Close",
+     "t": 6.975
+    },
+    {
+     "w": "it,",
+     "t": 7.382
+    },
+    {
+     "w": "Kevin.",
+     "t": 7.613
+    },
+    {
+     "w": "We're",
+     "t": 8.021
+    },
+    {
+     "w": "not",
+     "t": 8.429
+    },
+    {
+     "w": "penguins.\"",
+     "t": 8.659
+    }
+   ]
+  },
+  {
+   "id": "reply",
+   "text": "Kevin just said, \"Trust me. You'll thank me at three.\"",
+   "start": 9.287,
+   "end": 12.077,
+   "words": [
+    {
+     "w": "Kevin",
+     "t": 9.287
+    },
+    {
+     "w": "just",
+     "t": 9.745
+    },
+    {
+     "w": "said,",
+     "t": 10.004
+    },
+    {
+     "w": "\"Trust",
+     "t": 10.263
+    },
+    {
+     "w": "me.",
+     "t": 10.522
+    },
+    {
+     "w": "You'll",
+     "t": 10.781
+    },
+    {
+     "w": "thank",
+     "t": 11.041
+    },
+    {
+     "w": "me",
+     "t": 11.3
+    },
+    {
+     "w": "at",
+     "t": 11.559
+    },
+    {
+     "w": "three.\"",
+     "t": 11.818
+    }
+   ]
+  },
+  {
+   "id": "shut",
+   "text": "By eleven, Dave had shut every single window.",
+   "start": 12.297,
+   "end": 14.987,
+   "words": [
+    {
+     "w": "By",
+     "t": 12.297
+    },
+    {
+     "w": "eleven,",
+     "t": 12.498
+    },
+    {
+     "w": "Dave",
+     "t": 13.008
+    },
+    {
+     "w": "had",
+     "t": 13.364
+    },
+    {
+     "w": "shut",
+     "t": 13.565
+    },
+    {
+     "w": "every",
+     "t": 13.766
+    },
+    {
+     "w": "single",
+     "t": 14.276
+    },
+    {
+     "w": "window.",
+     "t": 14.632
+    }
+   ]
+  },
+  {
+   "id": "pitch",
+   "text": "At three o'clock, Dave stood up to give the biggest pitch of his career...",
+   "start": 15.207,
+   "end": 19.363,
+   "words": [
+    {
+     "w": "At",
+     "t": 15.207
+    },
+    {
+     "w": "three",
+     "t": 15.44
+    },
+    {
+     "w": "o'clock,",
+     "t": 15.673
+    },
+    {
+     "w": "Dave",
+     "t": 16.085
+    },
+    {
+     "w": "stood",
+     "t": 16.497
+    },
+    {
+     "w": "up",
+     "t": 16.73
+    },
+    {
+     "w": "to",
+     "t": 16.963
+    },
+    {
+     "w": "give",
+     "t": 17.195
+    },
+    {
+     "w": "the",
+     "t": 17.607
+    },
+    {
+     "w": "biggest",
+     "t": 17.84
+    },
+    {
+     "w": "pitch",
+     "t": 18.252
+    },
+    {
+     "w": "of",
+     "t": 18.485
+    },
+    {
+     "w": "his",
+     "t": 18.718
+    },
+    {
+     "w": "career...",
+     "t": 18.951
+    }
+   ]
+  },
+  {
+   "id": "blank",
+   "text": "and forgot every word.",
+   "start": 19.583,
+   "end": 20.872,
+   "words": [
+    {
+     "w": "and",
+     "t": 19.583
+    },
+    {
+     "w": "forgot",
+     "t": 19.787
+    },
+    {
+     "w": "every",
+     "t": 20.149
+    },
+    {
+     "w": "word.",
+     "t": 20.667
+    }
+   ]
+  },
+  {
+   "id": "why",
+   "text": "Here's why. Every breath you let out is full of carbon dioxide.",
+   "start": 21.092,
+   "end": 24.974,
+   "words": [
+    {
+     "w": "Here's",
+     "t": 21.092
+    },
+    {
+     "w": "why.",
+     "t": 21.505
+    },
+    {
+     "w": "Every",
+     "t": 21.739
+    },
+    {
+     "w": "breath",
+     "t": 22.332
+    },
+    {
+     "w": "you",
+     "t": 22.566
+    },
+    {
+     "w": "let",
+     "t": 22.799
+    },
+    {
+     "w": "out",
+     "t": 23.033
+    },
+    {
+     "w": "is",
+     "t": 23.267
+    },
+    {
+     "w": "full",
+     "t": 23.5
+    },
+    {
+     "w": "of",
+     "t": 23.734
+    },
+    {
+     "w": "carbon",
+     "t": 23.968
+    },
+    {
+     "w": "dioxide.",
+     "t": 24.381
+    }
+   ]
+  },
+  {
+   "id": "ppm",
+   "text": "In a closed room full of people, it can pass fourteen hundred parts per million in a few hours.",
+   "start": 25.194,
+   "end": 30.555,
+   "words": [
+    {
+     "w": "In",
+     "t": 25.194
+    },
+    {
+     "w": "a",
+     "t": 25.429
+    },
+    {
+     "w": "closed",
+     "t": 25.663
+    },
+    {
+     "w": "room",
+     "t": 26.079
+    },
+    {
+     "w": "full",
+     "t": 26.313
+    },
+    {
+     "w": "of",
+     "t": 26.548
+    },
+    {
+     "w": "people,",
+     "t": 26.782
+    },
+    {
+     "w": "it",
+     "t": 27.198
+    },
+    {
+     "w": "can",
+     "t": 27.432
+    },
+    {
+     "w": "pass",
+     "t": 27.667
+    },
+    {
+     "w": "fourteen",
+     "t": 27.901
+    },
+    {
+     "w": "hundred",
+     "t": 28.317
+    },
+    {
+     "w": "parts",
+     "t": 28.732
+    },
+    {
+     "w": "per",
+     "t": 28.966
+    },
+    {
+     "w": "million",
+     "t": 29.201
+    },
+    {
+     "w": "in",
+     "t": 29.616
+    },
+    {
+     "w": "a",
+     "t": 29.851
+    },
+    {
+     "w": "few",
+     "t": 30.085
+    },
+    {
+     "w": "hours.",
+     "t": 30.32
+    }
+   ]
+  },
+  {
+   "id": "study",
+   "text": "At that level, a Harvard study found people's thinking scores dropped by about half.",
+   "start": 30.774,
+   "end": 35.633,
+   "words": [
+    {
+     "w": "At",
+     "t": 30.774
+    },
+    {
+     "w": "that",
+     "t": 31.016
+    },
+    {
+     "w": "level,",
+     "t": 31.257
+    },
+    {
+     "w": "a",
+     "t": 31.683
+    },
+    {
+     "w": "Harvard",
+     "t": 31.924
+    },
+    {
+     "w": "study",
+     "t": 32.351
+    },
+    {
+     "w": "found",
+     "t": 32.777
+    },
+    {
+     "w": "people's",
+     "t": 33.018
+    },
+    {
+     "w": "thinking",
+     "t": 33.445
+    },
+    {
+     "w": "scores",
+     "t": 33.871
+    },
+    {
+     "w": "dropped",
+     "t": 34.298
+    },
+    {
+     "w": "by",
+     "t": 34.725
+    },
+    {
+     "w": "about",
+     "t": 34.966
+    },
+    {
+     "w": "half.",
+     "t": 35.392
+    }
+   ]
+  },
+  {
+   "id": "analogy",
+   "text": "It's like zipping your head inside a sleeping bag... and then trying to do math.",
+   "start": 35.853,
+   "end": 40.188,
+   "words": [
+    {
+     "w": "It's",
+     "t": 35.853
+    },
+    {
+     "w": "like",
+     "t": 36.083
+    },
+    {
+     "w": "zipping",
+     "t": 36.49
+    },
+    {
+     "w": "your",
+     "t": 36.897
+    },
+    {
+     "w": "head",
+     "t": 37.127
+    },
+    {
+     "w": "inside",
+     "t": 37.357
+    },
+    {
+     "w": "a",
+     "t": 37.941
+    },
+    {
+     "w": "sleeping",
+     "t": 38.171
+    },
+    {
+     "w": "bag...",
+     "t": 38.578
+    },
+    {
+     "w": "and",
+     "t": 38.808
+    },
+    {
+     "w": "then",
+     "t": 39.038
+    },
+    {
+     "w": "trying",
+     "t": 39.268
+    },
+    {
+     "w": "to",
+     "t": 39.498
+    },
+    {
+     "w": "do",
+     "t": 39.728
+    },
+    {
+     "w": "math.",
+     "t": 39.958
+    }
+   ]
+  },
+  {
+   "id": "loop",
+   "text": "So the next morning, Dave walked straight past Kevin, and...",
+   "start": 40.408,
+   "end": 43.75,
+   "words": [
+    {
+     "w": "So",
+     "t": 40.408
+    },
+    {
+     "w": "the",
+     "t": 40.663
+    },
+    {
+     "w": "next",
+     "t": 40.919
+    },
+    {
+     "w": "morning,",
+     "t": 41.175
+    },
+    {
+     "w": "Dave",
+     "t": 41.627
+    },
+    {
+     "w": "walked",
+     "t": 42.079
+    },
+    {
+     "w": "straight",
+     "t": 42.531
+    },
+    {
+     "w": "past",
+     "t": 42.787
+    },
+    {
+     "w": "Kevin,",
+     "t": 43.042
+    },
+    {
+     "w": "and...",
+     "t": 43.494
+    }
+   ]
+  }
+ ]
+}

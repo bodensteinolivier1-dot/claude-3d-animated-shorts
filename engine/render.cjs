@@ -3,12 +3,12 @@ const http = require('http'), fs = require('fs'), path = require('path'), { spaw
 const puppeteer = require('puppeteer-core');
 const ROOT = __dirname, [, , OUT = 'out/preview.mp4', w = '960', h = '540', fps = '24', ...stills] = process.argv;
 const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.json': 'application/json' };
-const CHROME = process.env.CHROME || ['/Applications/Google Chrome.app/Contents/MacOS/Google Chrome', '/usr/bin/google-chrome', '/usr/bin/chromium'].find(f => require('fs').existsSync(f));   // set CHROME=/path/to/chrome if not found
+const CHROME = process.env.CHROME || ['/Applications/Google Chrome.app/Contents/MacOS/Google Chrome', '/usr/bin/google-chrome', '/usr/bin/chromium', '/opt/pw-browsers/chromium'].find(f => require('fs').existsSync(f));   // set CHROME=/path/to/chrome if not found
 (async () => {
   const srv = http.createServer((q, r) => { const f = path.join(ROOT, decodeURIComponent(q.url.split('?')[0])); if (!f.startsWith(ROOT) || !fs.existsSync(f) || fs.statSync(f).isDirectory()) { r.writeHead(404); return r.end(); }
     r.writeHead(200, { 'Content-Type': TYPES[path.extname(f)] || 'application/octet-stream' }); fs.createReadStream(f).pipe(r); }).listen(0);
   const port = srv.address().port;
-  const browser = await puppeteer.launch({ executablePath: CHROME, headless: true, args: ['--use-angle=metal', '--enable-gpu', '--ignore-gpu-blocklist'] });
+  const browser = await puppeteer.launch({ executablePath: CHROME, headless: true, args: process.platform === 'darwin' ? ['--use-angle=metal', '--enable-gpu', '--ignore-gpu-blocklist'] : ['--no-sandbox', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
   const page = await browser.newPage(); page.on('requestfailed', r => console.log('FAIL', r.url())); page.on('response', r => { if (r.status() >= 400) console.log('HTTP', r.status(), r.url()); }); page.on('pageerror', e => console.log('PAGE ERROR', e.message)); page.on('console', m => console.log('console:', m.text()));
   await page.goto(`http://127.0.0.1:${port}/${process.env.PAGE || "index.html"}?w=${w}&h=${h}&look=${process.env.LOOK || 'c'}&style=${process.env.STYLE || 'ph'}${process.env.XQ || ''}`); await page.waitForFunction('window.ready', { timeout: 180000 });
   fs.mkdirSync(path.join(ROOT, path.dirname(OUT)), { recursive: true });

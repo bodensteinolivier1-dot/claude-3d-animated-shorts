@@ -571,7 +571,7 @@ window.DUR = Math.min(DUR, +(Q.get('dur') || 1e9)); window.frame = render; windo
 // ---------- character review page (owner 2026-11-10: "tạo 1 trang chỉ để mình duyệt nhân vật, cho phép xoay, zoom… góp ý trên đó") ----------
 // index.html?viewer=1 → live orbit view of the real cast (same rig/faces/colours as the film), mood + pose pickers, OK/Cần sửa notes
 // to the LAN feedback api (POST /api/feedback/nhan-vat-3d when served by lan-share).
-if (Q.has('viewer')) { if (Q.has('skit')) window.ready = false;   // the skit waits for the furniture before render.cjs starts
+if (Q.has('viewer')) { if (Q.has('skit') || Q.has('story')) window.ready = false;   // the skit waits for the furniture before render.cjs starts
   const { OrbitControls } = await import('three/addons/controls/OrbitControls.js');
   const NAMES = ['Áo hoodie', 'Áo vest', 'Áo polo', 'Thừa', 'Trưởng đoàn', 'Tí', ...ex.map((_, i) => `Người trong đoàn ${i + 1}`)];
   // outfit tests: hoodie / vest / polo on Thừa's body (owner 2026-11-10)
@@ -627,7 +627,12 @@ if (Q.has('viewer')) { if (Q.has('skit')) window.ready = false;   // the skit wa
     const load = async (src) => (CACHE[src] ||= GL.loadAsync(src));
     // one scale per kit so pieces stay in proportion: Kenney desk → 0.66 m, KayKit table_medium → 0.62 m (people are ~1.45 m)
     const kScale = {}; const kitScale = async (kit) => { if (kScale[kit]) return kScale[kit]; const ref = kit === 'kenney' ? 'kenney/desk.glb' : kit === 'polyhaven' ? 'polyhaven/metal_office_desk/metal_office_desk.gltf' : 'kaykit/table_medium.gltf'; const g = await load('./assets/props/' + ref); const b = new THREE.Box3().setFromObject(g.scene); return (kScale[kit] = (kit === 'kaykit' ? 0.62 : 0.66) / (b.max.y - b.min.y)); };
-    const put = async (kit, name, x, z, ry = 0, o = {}) => { const g = await load(kit === 'polyhaven' ? `./assets/props/polyhaven/${name}/${name}.gltf` : `./assets/props/${kit}/${name}.${kit === 'kenney' ? 'glb' : 'gltf'}`); const k = (await kitScale(kit)) * (o.k || 1);
+    // Poly Haven not fetched (e.g. host blocked) → stand-in from the Kenney kit, or skip the prop
+    const PH_FALLBACK = { metal_office_desk: ['desk'], modern_arm_chair_01: ['chairDesk'], Shelf_01: ['bookcaseOpen'], drawer_cabinet: ['sideTableDrawers'], painted_wooden_shelves: ['bookcaseClosedWide'],
+      potted_plant_01: ['pottedPlant', 1.3], potted_plant_02: ['pottedPlant', 1.3], pachira_aquatica_01: ['pottedPlant', 1.8], potted_plant_04: ['plantSmall2'], desk_lamp_arm_01: ['lampSquareTable', 0.8], book_encyclopedia_set_01: ['books'], CoffeeCart_01: ['kitchenCoffeeMachine'] };
+    const phOk = {}; const hasPH = async (name) => (phOk[name] ??= (await fetch(`./assets/props/polyhaven/${name}/${name}.gltf`, { method: 'HEAD' }).then(r => r.ok).catch(() => false)));
+    const put = async (kit, name, x, z, ry = 0, o = {}) => { if (kit === 'polyhaven' && !(await hasPH(name))) { const fb = PH_FALLBACK[name]; if (!fb) return null; kit = 'kenney'; o = { ...o, k: (o.k || 1) * (fb[1] || 1) }; name = fb[0]; }
+      const g = await load(kit === 'polyhaven' ? `./assets/props/polyhaven/${name}/${name}.gltf` : `./assets/props/${kit}/${name}.${kit === 'kenney' ? 'glb' : 'gltf'}`); const k = (await kitScale(kit)) * (o.k || 1);
       const obj = g.scene.clone(true); const ms = []; obj.traverse(m => { if (m.isMesh) ms.push(m); }); ms.forEach(m => { const src = m.material; if (kit === 'polyhaven') { m.castShadow = m.receiveShadow = true; if (src.map) src.map.anisotropy = 8; return; }   // Poly Haven: keep the scanned PBR materials
         m.material = new THREE.MeshStandardMaterial({ color: src.color ? src.color.clone() : new THREE.Color('#ffffff'), map: src.map || null, roughness: Math.max(0.45, src.roughness ?? 0.7), metalness: Math.min(0.2, src.metalness ?? 0) }); m.castShadow = true; m.receiveShadow = true;
         if (!o.noInk && Q.get('propink') === '1') { const h = new THREE.Mesh(m.geometry, hull(0.012 / k)); m.add(h); } });   // props: no ink line, real-looking like the RicksClips worlds
@@ -694,7 +699,12 @@ if (Q.has('viewer')) { if (Q.has('skit')) window.ready = false;   // the skit wa
     ALL.forEach((c) => SR.updateLimbs(c)); if (!OFFICE) W.update(t, ctl.target);
     const f = ctl.target.clone(); sun.target.position.copy(f); sun.position.copy(f).addScaledVector(SUNDIR, 60); const sc = sun.shadow.camera; sc.left = sc.bottom = -8; sc.right = sc.top = 8; sc.near = 1; sc.far = 140; sc.updateProjectionMatrix();
     post.bokeh.enabled = false; U.uTime.value = t; ctl.update(); post.render(); requestAnimationFrame(loop); };
-  if (!Q.has('skit')) loop(); else {
+  if (Q.has('story')) {   // ?viewer=1&story=<name> → engine/story_<name>.js drives the office set (see shorts/<name>/)
+    ui.style.display = 'none'; window.ready = false;
+    const mod = await import(`./story_${Q.get('story')}.js`);
+    await mod.default({ THREE, SR, Q, scene, camera, renderer, canvas, post, U, hemi, sun, SUNDIR, WW, HH, O: OFF_O, Z, FY, OUTF, thua, chief, ti, ex, ALL,
+      V, clamp, eio, ease, lerp, place, idle, face, arm, Lw, dirW, look, headC, yawTo, hips, headTurn, waveArms, resetScene, setLook });
+  } else if (!Q.has('skit')) loop(); else {
   // ---------- 10 s skit "Trả lời tất cả" (owner 2026-11-10: "làm thử 1 kịch bản nhẹ nhẹ 10s") ----------
   ui.style.display = 'none';
   const O = OFF_O, VEST = OUTF[1], ZD = Z - 2.9, DESKS = [-6.2, -2.1, 2.1, 6.2], ME = 2.1, CO = [[thua, -6.2], [ti, -2.1], [chief, 6.2]];
