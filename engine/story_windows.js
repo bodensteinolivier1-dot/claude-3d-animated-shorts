@@ -20,9 +20,13 @@ export default async function story(ctx) {
   const blinkEyes = (g, F) => { g.strokeStyle = F.IK; g.lineWidth = 16; g.lineCap = 'round'; for (const sd of [-1, 1]) { g.beginPath(); g.moveTo(sd * F.EX - 30, -52); g.quadraticCurveTo(sd * F.EX, -40, sd * F.EX + 30, -52); g.stroke(); } };
   const smallO = (g, w, h) => { g.fillStyle = '#5c1212'; g.strokeStyle = '#17141a'; g.lineWidth = 12; g.beginPath(); g.ellipse(0, 104, w, h, 0, 0, 7); g.fill(); g.stroke(); };
   const smugM = (g, F) => { g.strokeStyle = F.IK; g.lineWidth = F.LW; g.beginPath(); g.moveTo(-55, 205); g.quadraticCurveTo(10, 240, 75, 180); g.stroke(); };
-  addFace('calm_b', (g, F) => { blinkEyes(g, F); F.mFrownS(g); });
-  addFace('calm_t', (g, F) => { F.lidEyes(g); smallO(g, 24, 20); });
-  addFace('calm_tb', (g, F) => { blinkEyes(g, F); smallO(g, 24, 20); });
+  const rcEyes = (g, F) => { g.fillStyle = F.IK; for (const sd of [-1, 1]) { g.beginPath(); g.ellipse(sd * F.EX * 1.15, -18, 25, 31, 0, 0, 7); g.fill(); } };
+  const rcBrows = (g, F, k = 1) => { g.strokeStyle = F.IK; g.lineCap = 'round'; g.lineWidth = 34; for (const sd of [-1, 1]) { g.beginPath(); g.moveTo(sd * 40, -78 + 14 * k); g.lineTo(sd * 165, -100 - 10 * k); g.stroke(); } };
+  const rcSmirk = (g, F) => { g.strokeStyle = F.IK; g.lineWidth = 16; g.lineCap = 'round'; g.beginPath(); g.moveTo(-34, 96); g.quadraticCurveTo(8, 108, 40, 88); g.stroke(); };
+  addFace('calm', (g, F) => { rcBrows(g, F); rcEyes(g, F); rcSmirk(g, F); });
+  addFace('calm_b', (g, F) => { rcBrows(g, F); blinkEyes(g, F); rcSmirk(g, F); });
+  addFace('calm_t', (g, F) => { rcBrows(g, F); rcEyes(g, F); smallO(g, 24, 20); });
+  addFace('calm_tb', (g, F) => { rcBrows(g, F); blinkEyes(g, F); smallO(g, 24, 20); });
   addFace('smug_b', (g, F) => { blinkEyes(g, F); F.brows(g, 0.2, -86); smugM(g, F); });
   addFace('angry', (g, F) => { F.lidEyes(g); F.brows(g, 0.9, -96, 46); F.mFrown(g, 50, 215); });
   addFace('angry_t', (g, F) => { F.lidEyes(g); F.brows(g, 0.9, -96, 46); F.mOpen(g, 80, 95, 185, true); });
@@ -230,6 +234,7 @@ export default async function story(ctx) {
 
   const TAKES = [[THUA, B.yank + 0.3], [TI, B.yank + 0.45], [XT, B.yank + 0.35], [XY, B.yank + 0.5], [XR, B.yank + 0.4], [DAVE, B.rxn, 0], [THUA, B.open + 0.35], [TI, B.open + 0.5], [XR, B.open + 0.45], [XY, B.open + 0.3]];
   const RED = new THREE.Color('#ff5a4a');
+  const CREAM = new THREE.Color('#f6ead6'); ALL.forEach(c => c.tint && c.tint.copy(CREAM));   // warm cream heads like the reference
   const toonPass = (t) => { for (const c of ALL) { if (!c.root.visible) continue; const ph = c.phase || 0; let sy = 1 + 0.028 * Math.sin(t * 5.5 + ph * 4), up = 0;
       if (c._walk) { up += 0.05 * Math.abs(Math.sin(c._walk * Math.PI * 1.9)); sy *= 1 + 0.06 * Math.sin(c._walk * Math.PI * 3.8); }
       if (c._talk) { up += 0.03 * clamp(c._talk); sy *= 1 + 0.06 * clamp(c._talk); }
@@ -281,9 +286,9 @@ export default async function story(ctx) {
   const WORDS = T.lines.flatMap(l => l.words);
   const KEYW = /JANUARY|FREEZING|PENGUINS|THREE|ELEVEN|WINDOW|FORGOT|CARBON|DIOXIDE|FOURTEEN|HUNDRED|HALF|HARVARD|SLEEPING|MATH|HIMSELF|BREATH|EVERY/;
   const caption = (t) => { let i = -1; for (let k = 0; k < WORDS.length; k++) if (t >= WORDS[k].t - 0.03) i = k; if (i < 0) return; const w = WORDS[i], nx = WORDS[i + 1], end = nx ? Math.min(nx.t - 0.03, w.t + 0.9) : w.t + 0.9; if (t > end) return;
-    const txt = w.w.replace(/["“”.,…!?]/g, '').toUpperCase(), hot = KEYW.test(txt), p = backOut((t - w.t + 0.03) / 0.13), sz = hot ? 128 : 112;
-    og.save(); og.translate(WW / 2, HH * 0.72); og.scale(K * (0.65 + 0.35 * p), K * (0.65 + 0.35 * p)); og.rotate(hot ? -0.05 : 0); og.font = `${sz}px Anton, sans-serif`; og.textAlign = 'center'; og.textBaseline = 'middle'; og.lineJoin = 'round';
-    const k = Math.min(1, 940 / og.measureText(txt).width); og.scale(k, k); og.lineWidth = sz * 0.22; og.strokeStyle = '#111'; og.strokeText(txt, 0, 6); og.strokeText(txt, 0, 0); og.fillStyle = hot ? '#ffe14d' : '#ffffff'; og.fillText(txt, 0, 0); og.restore(); };
+    const txt = w.w.replace(/["“”]/g, '').replace(/\.\.\.$/, '.'), hot = false, p = backOut((t - w.t + 0.03) / 0.13), sz = 104;
+    og.save(); og.translate(WW / 2, HH * 0.72); og.scale(K * (0.65 + 0.35 * p), K * (0.65 + 0.35 * p)); og.font = `${sz}px InterB, sans-serif`; og.textAlign = 'center'; og.textBaseline = 'middle'; og.lineJoin = 'round';
+    const k = Math.min(1, 940 / og.measureText(txt).width); og.scale(k, k); og.lineWidth = sz * 0.2; og.strokeStyle = '#111'; og.strokeText(txt, 0, 0); og.fillStyle = '#ffffff'; og.fillText(txt, 0, 0); og.restore(); };
 
   const frame = (t) => {
     T0 = t; shakeAmt = 0;
@@ -329,7 +334,7 @@ export default async function story(ctx) {
       else if (t < B.turn) { const u = eio(seg(t, B.grab, B.turn)); shakeAt(t, B.yank + 0.05, 0.4, 0.035); cam(V(lerp(-2.25, -2.45, u), lerp(1.55, 1.6, u), lerp(-23.5, -23.85, u)), V(-3.25, 1.6, ZB + 0.2), 44); dof(2.2, 0.006); }   // A2 behind him: grab… YANK
       else if (t < B.freeze) { const u = eio(seg(t, B.turn, B.freeze)), h = headC(KEV); cam(V(-3.65, lerp(1.5, 1.55, u), lerp(-23.0, -23.55, u)), h.clone().add(V(0, -0.1, 0)), 40); dof(lerp(2.3, 1.8, u), 0.01); }   // A3 front: deadpan turn, snow blowing past
       else if (t < B.whipB) { const u = eio(seg(t, B.freeze, B.whipB)), h = headC(THUA); cam(V(-1.15 + 0.1 * u, 1.5, -22.35 - 0.15 * u), h.clone().add(V(0, 0.02, 0)), 40); dof(1.35, 0.012); }   // B1 Thua: chattering teeth
-      else if (t < B.mock) { const A = headC(TI), Bh = headC(DAVE); cam(V(4.2, 1.55, -21.7), whip(t, B.whipB + 0.12, A, Bh).add(V(0, -0.1, 0)), 36, t > B.whipB + 0.12 && t < B.whipB + 0.38 ? 0.05 : 0); dof(2.3, 0.008); }   // B2 Ti → whip → Dave shivering
+      else if (t < B.mock) { const A = headC(TI), Bh = headC(DAVE); cam(V(4.2, 1.85, -21.9), whip(t, B.whipB + 0.12, A, Bh).add(V(0, -0.1, 0)), 36, t > B.whipB + 0.12 && t < B.whipB + 0.38 ? 0.05 : 0); dof(2.3, 0.008); }   // B2 Ti → whip → Dave shivering
       else if (t < B.inface) { const p = DAVE.root.position; cam(V(p.x + 0.4, 1.85, -22.2), V(p.x - 0.3, 1.25, p.z), 44); dof(2.2, 0.006); }   // C1 Dave storms over
       else if (t < B.reply) { const u = eio(seg(t, B.inface, B.reply)); cam(V(-4.4 + 0.15 * u, 1.35, -24.5 - 0.05 * u), V(-1.85, 1.55, -24.6), 40); dof(2.5, 0.007); }   // C2 two-shot, low: Dave in his face
       else if (t < B.rxn) { const u = eio(seg(t, B.reply, B.rxn)), h = headC(KEV), f = dirW(KEV, 0, 0, 1); cam(V(lerp(-2.45, -2.65, u), 1.5, lerp(-23.7, -24.0, u)), h.clone().add(V(0, -0.1, 0)), 36); dof(h.distanceTo(camera.position), 0.012); }   // D1 Kevin sips… "Trust me"
