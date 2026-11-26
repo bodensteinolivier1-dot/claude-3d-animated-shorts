@@ -4,7 +4,7 @@
 // Render: XQ="&viewer=1&story=windows" node render.cjs out/windows.mp4 720 1280 30   (SFX_OUT=file.json dumps the sound cues)
 export default async function story(ctx) {
   const { THREE, SR, scene, camera, renderer, canvas, post, U, hemi, sun, SUNDIR, WW, HH, O, Z, FY, OUTF, thua, ti, ex, ALL,
-    V, clamp, eio, lerp, place, idle, face, arm, Lw, dirW, look, headC, yawTo, hips, headTurn, waveArms, resetScene, setLook, put, addFace } = ctx;
+    V, clamp, eio, lerp, place, idle, face, arm, Lw, dirW, look, headC, yawTo, hips, headTurn, waveArms, resetScene, setLook, put, addFace, base } = ctx;
 
   // ---------- timing ----------
   const T = await (await fetch('./film/story_windows.json')).json();
@@ -35,7 +35,13 @@ export default async function story(ctx) {
 
   // ---------- cast ----------
   const KEV = OUTF[0], DAVE = OUTF[1], THUA = thua, TI = ti, GREEN = ex[4];
-  const CAST = [KEV, DAVE, THUA, TI, GREEN];
+  const XS = [SR.build({ ...base, jacket: '#e8442a', jacket2: '#b8321f', details: ['polo'], collarCol: '#ffffff', logoCol: '#f2cf2c' }),
+    SR.build({ ...base, jacket: '#8a5cd6', jacket2: '#6a40b0', details: ['hoodie'], hat: 'cap', hatCol: '#f27fb2', capBack: true }),
+    SR.build({ ...base, jacket: '#2fb3a6', jacket2: '#1f8379', pattern: ['stripes', '#ffffff'], details: ['bow'], tieCol: '#f2cf2c' }),
+    SR.build({ ...base, jacket: '#f2cf2c', jacket2: '#c9a516', pattern: ['dots', '#ff7a59'], details: ['collar'], collarCol: '#3d7be0' })];
+  XS.forEach((c, i) => { c.root.scale.setScalar(0.8); c.phase = 5 + i * 0.53; c.root.rotation.order = 'YXZ'; face(c, 'calm'); c.tint = c.hm.material.uniforms.base.value.clone(); ALL.push(c); });
+  const [XR, XP, XT, XY] = XS;
+  const CAST = [KEV, DAVE, THUA, TI, GREEN, ...XS];
   const ZB = Z - 6, ZD = Z - 2.9, CHZ = ZD - 0.55;
   const DX = 1.45;   // Dave's spot at the whiteboard (left end, chart on his left-hand side)
   const DESK = { kev: -6.2, thua: -2.1, dave: 2.1, ti: 6.2 };
@@ -51,6 +57,7 @@ export default async function story(ctx) {
     await put('polyhaven', 'standing_picture_frame_01', 1.6, ZD - 0.15, 0.5, { y: FY + 0.66 });
     await put('kenney', 'coatRackStanding', -8.3, Z - 0.2, 0.4, { k: 1.25 });
   }
+  O.children.forEach(o => { const p = o.geometry?.parameters; if (!o.isMesh || !p || p.height !== 4.2) return; if (p.width === 18) o.material.color.set('#26c2ad'); else if (p.width === 0.2) o.material.color.set('#ffc94d'); });   // bright teal back wall, sunny side walls
   // canvas helper
   const ctex = (w, h, draw) => { const c = document.createElement('canvas'); c.width = w; c.height = h; const g = c.getContext('2d'); draw(g, w, h); const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; return t; };
   const panel = (tex, w, h, x, y, z, ry = 0) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshStandardMaterial({ map: tex, roughness: 0.7 })); m.position.set(x, y, z); m.rotation.y = ry; m.receiveShadow = true; O.add(m); return m; };
@@ -137,7 +144,7 @@ export default async function story(ctx) {
   const bubbles = sprites(200, co2T), vapor = sprites(60, dotT);
   const bang = ctex(128, 128, (g) => { g.fillStyle = '#fff'; g.beginPath(); g.arc(64, 60, 50, 0, 7); g.fill(); g.lineWidth = 6; g.strokeStyle = '#2a1612'; g.stroke(); g.fillStyle = '#e8442a'; g.font = 'bold 72px InterB, sans-serif'; g.textAlign = 'center'; g.fillText('!', 64, 86); });
   const zzz = ctex(128, 128, (g) => { g.fillStyle = '#fff'; g.strokeStyle = '#2a1612'; g.lineWidth = 8; g.font = 'bold 64px Anton, sans-serif'; g.textAlign = 'center'; g.strokeText('Z', 64, 84); g.fillText('Z', 64, 84); });
-  const pops = sprites(6, bang), zs = sprites(12, zzz); pops.concat(zs).forEach(s => (s.material.depthTest = false));
+  const pops = sprites(6, bang), zs = sprites(36, zzz); pops.concat(zs).forEach(s => (s.material.depthTest = false));
 
   // 2-D overlay: cards, ppm counter, bar graph
   const out = document.createElement('canvas'); out.width = WW; out.height = HH; const og = out.getContext('2d'); const K = WW / 1080;
@@ -162,11 +169,11 @@ export default async function story(ctx) {
   const SC = 0.8; const squash = (c, k) => { c.root.scale.set(SC * (1 + 0.5 * k), SC * (1 - k), SC * (1 + 0.5 * k)); };   // k>0 squash, k<0 stretch
   const blinkAt = (c, t) => { const i = CAST.indexOf(c), p = 2.6 + hash(i, 9) * 1.6, ph = (t + hash(i, 10) * 3) % p; return ph < 0.11; };
   const mood = (c, m, t) => face(c, blinkAt(c, t) && BLINKABLE[m] ? BLINKABLE[m] : m);
-  const speak = (c, t, open, closed) => { const a = amp(t); mood(c, a > 0.18 ? open : closed, t); headTurn(c, 0, 0.05 * Math.sin(t * 9) * clamp(a)); };
-  const stand = (c, x, z, ry, t) => { place(c, x, z, ry, FY); c.root.scale.setScalar(SC); idle(c, t); };
+  const speak = (c, t, open, closed) => { const a = amp(t); c._talk = a; mood(c, a > 0.18 ? open : closed, t); headTurn(c, 0, 0.05 * Math.sin(t * 9) * clamp(a)); };
+  const stand = (c, x, z, ry, t) => { place(c, x, z, ry, FY); c.root.scale.setScalar(SC); idle(c, t); headTurn(c, 0.07 * Math.sin(t * 1.3 + c.phase * 3), 0.03 * Math.sin(t * 1.9 + c.phase)); };
   const walk = (c, P, t0, t1, t, spd = 1.25) => { const k = seg(t, t0, t1), L = []; let tot = 0; for (let i = 1; i < P.length; i++) { L.push(P[i].distanceTo(P[i - 1])); tot += L[i - 1]; }
     let s = k * tot, i = 0; while (i < L.length - 1 && s > L[i]) { s -= L[i]; i++; } const a = P[i].clone().lerp(P[i + 1], clamp(s / L[i])), d = P[i + 1].clone().sub(P[i]);
-    place(c, a.x, a.z, Math.atan2(d.x, d.z), FY); c.root.scale.setScalar(SC); if (k > 0 && k < 1) SR.clipAt(c, 'walk', (t - t0) * spd); else idle(c, t); return a; };
+    place(c, a.x, a.z, Math.atan2(d.x, d.z), FY); c.root.scale.setScalar(SC); if (k > 0 && k < 1) { SR.clipAt(c, 'walk', (t - t0) * spd); c._walk = (t - t0) * spd; } else idle(c, t); return a; };
   const hug = (c, t, k = 1) => { const j = 0.016 * Math.sin(t * 47) * k; c.root.position.x += j; c.root.position.y += Math.abs(j) * 0.4; arm(c, 'Left', Lw(c, -0.15, 0.98 + j, 0.32)); arm(c, 'Right', Lw(c, 0.15, 0.95 - j, 0.32)); };
   const type = (c, t) => { const a = 0.03 * Math.sin(t * 28), b = 0.03 * Math.sin(t * 31 + 1); arm(c, 'Left', Lw(c, 0.16, 0.97 + a, 0.52)); arm(c, 'Right', Lw(c, -0.16, 0.97 + b, 0.52)); };
   const jab = (c, t) => { const j = Math.max(0, Math.sin(t * 11)); arm(c, 'Right', Lw(c, -0.1, 1.38 + 0.04 * j, 0.6 + 0.3 * j), dirW(c, -1, 0, 0)); arm(c, 'Left', Lw(c, 0.3, 0.9, 0.05)); };
@@ -184,12 +191,12 @@ export default async function story(ctx) {
   const zOver = (c, i, t) => { const h = headC(c); for (let j = 0; j < 3; j++) { const s = zs[i * 3 + j], a = (t * 0.6 + j / 3 + i * 0.2) % 1; s.visible = true; s.position.set(h.x + 0.15 + a * 0.25, h.y + 0.3 + a * 0.45, h.z); s.scale.setScalar(0.1 + a * 0.12); s.material.opacity = clamp(a * 4) * clamp((1 - a) * 3); } };
   const flyPapers = (t, t0, srcs) => { papers.forEach((p, i) => { const a = t - t0 - hash(i, 20) * 0.6; if (a < 0 || a > 3.2) { p.visible = false; return; } const s = srcs[i % srcs.length];
       p.visible = true; p.position.set(s.x + (hash(i, 21) - 0.5) * 1.2 + a * (hash(i, 22) - 0.5) * 1.6, FY + 1.1 + a * 0.9 - a * a * 0.22 + 0.15 * Math.sin(a * 5 + i), s.z + a * (1.2 + hash(i, 23) * 1.6)); p.rotation.set(a * (3 + i % 3), a * 2.3 + i, a * (2 + i % 4)); }); };
-  const haze = (k) => { scene.fog.color.set('#9aa39a'); scene.fog.near = lerp(400, 1.5, k); scene.fog.far = lerp(4000, 22, k); };
-  const grade = (mode) => { setLook('day'); SUNDIR.set(0.35, 0.5, -0.75).normalize(); U.uSat.value = 1.2; U.uVig.value = 0.55;
-    const P = { cold: [0.36, '#a8c0ea', 2.3, '#e8eeff', 1.22, -0.03, 0.47], stale: [0.34, '#c8c0a0', 2.2, '#ffd9a0', 1.2, 0.06, 0.44], morning: [0.6, '#fff3e2', 2.5, '#ffe2b0', 1.14, 0.08, 0.66] }[mode];
+  const haze = (k) => { k *= 0.7; scene.fog.color.set('#c8d6a0'); scene.fog.near = lerp(400, 2.5, k); scene.fog.far = lerp(4000, 26, k); };
+  const grade = (mode) => { setLook('day'); SUNDIR.set(0.35, 0.5, -0.75).normalize(); U.uSat.value = 1.45; U.uVig.value = 0.3;
+    const P = { cold: [0.6, '#c4d6f4', 2.7, '#f4f6ff', 1.1, 0.0, 0.64], stale: [0.58, '#f4e6c8', 2.6, '#ffe2b0', 1.1, 0.07, 0.62], morning: [0.75, '#fff3e2', 2.8, '#ffe9c4', 1.08, 0.09, 0.76] }[mode];
     hemi.intensity = P[0]; hemi.color.set(P[1]); sun.intensity = P[2]; sun.color.set(P[3]); U.uCon.value = P[4]; U.uWarm.value = P[5]; renderer.toneMappingExposure = P[6]; };
   const dof = (d, a) => { post.bokeh.enabled = d > 0; if (d > 0) { post.bokeh.uniforms.focus.value = d; post.bokeh.uniforms.aperture.value = a; } };
-  let shakeAmt = 0; const cam = (p, tg, fov, roll = 0) => { const s = shakeAmt; look(p.clone().add(V(s * Math.sin(T0 * 61), s * Math.sin(T0 * 47 + 1), 0)), tg, fov, roll); };
+  let shakeAmt = 0; const cam = (p, tg, fov, roll = 0) => { const s = shakeAmt, c0 = CUTS.filter(c => c <= T0 + 1e-4).pop() ?? 0, k = eio(seg(T0, c0, c0 + 0.22)); look(p.clone().add(V(s * Math.sin(T0 * 61), s * Math.sin(T0 * 47 + 1), 0)), tg, fov * (1 + 0.16 * (1 - k)), roll); };
   let T0 = 0; const shakeAt = (t, t0, d = 0.35, a = 0.03) => { if (t >= t0 && t < t0 + d) shakeAmt = Math.max(shakeAmt, a * (1 - (t - t0) / d)); };
   const whip = (t, t1, A, B, d = 0.26) => B && t > t1 ? A.clone().lerp(B, eio((t - t1) / d)) : A;
 
@@ -200,6 +207,16 @@ export default async function story(ctx) {
     blank: S('blank') - 0.15, why: S('why') - 0.1, aud: S('why') + 1.8, ppm: S('ppm') - 0.1, top: S('ppm') + 2.5, study: S('study') - 0.1, plant: S('study') + 1.9,
     ana: S('analogy') - 0.1, stumble: S('analogy') + 1.9, morn: S('end') - 0.5, open: wt('end', 'opened') - 0.1, kev: E('end') - 0.05,
   };
+  const CUTS = [0, B.grab, B.yank, B.turn, B.freeze, B.mock, B.inface, B.reply, B.rxn, B.shut, B.slam1, B.cut2, B.slam2, B.clock, B.pitch, B.hero, B.blank, B.why, B.aud, B.ppm, B.top, B.study, B.plant + 0.45, B.ana, B.ana + 0.6, B.stumble, B.stumble + 1.1, B.morn, B.open - 0.6, B.open, B.kev].sort((a, b) => a - b);
+  // background coworkers: always busy (typing, pacing with papers, rummaging the shelf, reading a clipboard); shiver when it is cold
+  const extras = (t, cold) => {
+    const cz = (c, i) => { hug(c, t + i * 0.3); mood(c, Math.sin(t * 36 + i * 2) > 0 ? 'cold_t' : 'cold', t); chill(c, 1); };
+    stand(XR, -6.2, CHZ, 0.1, t + 2); if (cold) cz(XR, 0); else { type(XR, t + 2); mood(XR, 'calm', t); }
+    { const per = 6.4, u = ((t + 1.3) % per) / per, fw = u < 0.5, x = fw ? lerp(3.9, 6.9, u * 2) : lerp(6.9, 3.9, (u - 0.5) * 2);
+      place(XP, x, -24.35, fw ? Math.PI / 2 : -Math.PI / 2, FY); XP.root.scale.setScalar(SC); SR.clipAt(XP, 'walk', t * 1.3); XP._walk = t * 1.3;
+      if (cold) cz(XP, 1); else { arm(XP, 'Left', Lw(XP, 0.12, 1.02, 0.36)); arm(XP, 'Right', Lw(XP, -0.12, 1.02, 0.36)); mood(XP, 'calm', t); } }
+    stand(XT, 7.6, -24.95, cold ? 0.2 : Math.PI, t + 3); if (cold) cz(XT, 2); else { const r = Math.sin(t * 3); arm(XT, 'Left', Lw(XT, 0.25, 1.35 + 0.1 * r, 0.4)); arm(XT, 'Right', Lw(XT, -0.25, 1.3 - 0.1 * r, 0.4)); mood(XT, 'calm', t); }
+    stand(XY, -7.7, -24.85, 0.35, t + 4); if (cold) cz(XY, 3); else { arm(XY, 'Left', Lw(XY, 0.1, 1.15, 0.38)); arm(XY, 'Right', Lw(XY, -0.12, 1.12, 0.36)); headTurn(XY, 0, 0.25); mood(XY, 'calm', t); } };
   // window open factors
   const W_OPEN = [t => (t < B.slam2 - 0.25 ? 1 : t < B.slam2 ? 1 - eio(seg(t, B.slam2 - 0.25, B.slam2)) : t < B.morn ? 0 : 1),
     t => (t < B.yank ? 0 : t < B.slam1 - 0.25 ? eio((t - B.yank) / 0.22) : t < B.slam1 ? 1 - eio(seg(t, B.slam1 - 0.25, B.slam1)) : t < B.open ? 0 : eio((t - B.open) / 0.25))];
@@ -211,9 +228,66 @@ export default async function story(ctx) {
     ['whoosh', B.study], ['thud', B.plant + 0.45], ['whoosh', B.ana + 0.2], ['thud', B.ana + 0.6], ['zip', B.ana + 0.9], ['bonk', B.stumble + 1.1], ['rooster', B.morn + 0.1], ['whoosh', B.open - 0.05], ['wind_gust', B.open], ['sting', B.kev + 0.6]];
   window.MUSIC = { stop: B.blank, science: B.why, morning: B.morn, end: DUR };
 
+  const TAKES = [[THUA, B.yank + 0.3], [TI, B.yank + 0.45], [XT, B.yank + 0.35], [XY, B.yank + 0.5], [XR, B.yank + 0.4], [DAVE, B.rxn, 0], [THUA, B.open + 0.35], [TI, B.open + 0.5], [XR, B.open + 0.45], [XY, B.open + 0.3]];
+  const RED = new THREE.Color('#ff5a4a');
+  const toonPass = (t) => { for (const c of ALL) { if (!c.root.visible) continue; const ph = c.phase || 0; let sy = 1 + 0.028 * Math.sin(t * 5.5 + ph * 4), up = 0;
+      if (c._walk) { up += 0.05 * Math.abs(Math.sin(c._walk * Math.PI * 1.9)); sy *= 1 + 0.06 * Math.sin(c._walk * Math.PI * 3.8); }
+      if (c._talk) { up += 0.03 * clamp(c._talk); sy *= 1 + 0.06 * clamp(c._talk); }
+      let take = false; for (const [tc, t0, jh = 1] of TAKES) if (tc === c && t >= t0 && t < t0 + 0.65) { take = jh > 0; if (!take) continue; const u = (t - t0) / 0.65;
+        if (u < 0.12) sy *= 1 - 0.2 * (u / 0.12); else if (u < 0.78) { const v = (u - 0.12) / 0.66; up += 0.34 * Math.sin(Math.PI * v); sy *= 1 + 0.22 * Math.sin(Math.PI * v); c.head.scale.copy(c._hs).multiplyScalar(1 + 0.4 * Math.sin(Math.PI * v)); } else sy *= 1 - 0.16 * Math.sin(Math.PI * (u - 0.78) / 0.22); }
+      c.root.position.y += up; c.root.scale.set(c.root.scale.x / Math.sqrt(sy), c.root.scale.y * sy, c.root.scale.z / Math.sqrt(sy)); c.root.updateMatrixWorld(true);
+      if (take) { arm(c, 'Left', Lw(c, 0.42, 1.65, 0.12), dirW(c, 1, 0.2, -0.5)); arm(c, 'Right', Lw(c, -0.42, 1.65, 0.12), dirW(c, -1, 0.2, -0.5)); face(c, 'wide'); }
+      if (c === DAVE && t > B.mock && t < B.rxn + 0.3) c.hm.material.uniforms.base.value.lerp(RED, 0.4 * clamp((t - B.mock) / 0.6)); } };
+  // ---- comic FX drawn over the frame, anchored to 3-D points ----
+  const INK = '#1a1014';
+  const proj = (P) => { const p = P.clone().project(camera), d = camera.position.distanceTo(P); return { x: (p.x + 1) / 2 * WW, y: (1 - p.y) / 2 * HH, ok: p.z < 1 && p.z > -1 && d > 0.3, m: v => v * HH / (2 * Math.tan(camera.fov * Math.PI / 360) * d) }; };
+  const starPath = (r1, r2, n) => { og.beginPath(); for (let i = 0; i < n * 2; i++) { const a = i / (n * 2) * Math.PI * 2, r = i % 2 ? r2 : r1; og.lineTo(Math.cos(a) * r, Math.sin(a) * r); } og.closePath(); };
+  const burst = (P, t0, t, text, col = '#ffd21f') => { const u = (t - t0) / 0.6; if (u < 0 || u > 1) return; const q = proj(P); if (!q.ok) return; const s = backOut(u / 0.35) * (1 - clamp((u - 0.75) / 0.25)), r = Math.min(q.m(0.42), 260 * K) * s;
+    og.save(); og.translate(q.x, q.y); og.rotate(-0.12 + 0.3 * u); og.lineJoin = 'round'; og.fillStyle = '#ffffff'; starPath(r * 1.12, r * 0.62, 12); og.fill(); og.fillStyle = col; starPath(r, r * 0.55, 12); og.fill(); og.lineWidth = 6 * K; og.strokeStyle = INK; og.stroke();
+    og.rotate(-0.3 * u); og.font = `${Math.round(r * 0.42)}px Anton, sans-serif`; og.textAlign = 'center'; og.textBaseline = 'middle'; og.lineWidth = r * 0.09; og.strokeStyle = INK; og.strokeText(text, 0, 0); og.fillStyle = '#e8442a'; og.fillText(text, 0, 0); og.restore(); };
+  const emanata = (c, t0, t) => { const u = (t - t0) / 0.55; if (u < 0 || u > 1 || !c.root.visible) return; const q = proj(headC(c)); if (!q.ok) return; const r = q.m(0.3);
+    og.save(); og.translate(q.x, q.y); og.strokeStyle = INK; og.lineWidth = 7 * K; og.lineCap = 'round'; for (let i = 0; i < 9; i++) { const a = -Math.PI * (0.05 + 0.9 * i / 8), r1 = r * (1.25 + 0.3 * u), r2 = r1 + r * 0.35 * (1 - u); og.beginPath(); og.moveTo(Math.cos(a) * r1, Math.sin(a) * r1); og.lineTo(Math.cos(a) * r2, Math.sin(a) * r2); og.stroke(); } og.restore(); };
+  const cloud = (x, y, r, a) => { og.globalAlpha = a; const C = [[0, 0, 0.6], ...[0, 1, 2, 3, 4].map(i => { const b = i / 5 * Math.PI * 2; return [Math.cos(b) * 0.55, Math.sin(b) * 0.45, 0.45]; })];   // ink pass then white pass = outline only on the outside
+    for (const [pass, col, w] of [[0, INK, 10 * K], [1, '#ffffff', 0]]) { og.fillStyle = col; og.beginPath(); for (const [cx, cy, cr] of C) { og.moveTo(x + cx * r + cr * r + w / 2, y + cy * r); og.arc(x + cx * r, y + cy * r, cr * r + w / 2, 0, 7); } og.fill(); } og.globalAlpha = 1; };
+  const steam = (c, t) => { const q = proj(headC(c)); if (!q.ok) return; for (const sd of [-1, 1]) for (let j = 0; j < 3; j++) { const a = (t * 1.6 + j / 3 + (sd > 0 ? 0.15 : 0)) % 1; cloud(q.x + sd * q.m(0.3 + 0.15 * a), q.y - q.m(0.15 + 0.45 * a), q.m(0.06 + 0.07 * a), 1 - a); } };
+  const drop = (x, y, r, rot) => { og.save(); og.translate(x, y); og.rotate(rot); og.fillStyle = '#6cc3ff'; og.strokeStyle = INK; og.lineWidth = 4 * K; og.beginPath(); og.moveTo(0, -r * 1.8); og.quadraticCurveTo(r * 1.1, -r * 0.2, 0, r); og.quadraticCurveTo(-r * 1.1, -r * 0.2, 0, -r * 1.8); og.fill(); og.stroke(); og.restore(); };
+  const sweat = (c, t) => { const q = proj(headC(c)); if (!q.ok) return; for (let j = 0; j < 4; j++) { const a = (t * 1.8 + j / 4) % 1, sd = j % 2 ? 1 : -1; drop(q.x + sd * q.m(0.25 + 0.3 * a), q.y - q.m(0.25 + 0.25 * a - 0.6 * a * a), q.m(0.035), sd * (0.4 + a)); } };
+  const star5 = (x, y, r, col) => { og.save(); og.translate(x, y); og.fillStyle = col; og.strokeStyle = INK; og.lineWidth = 4 * K; og.beginPath(); for (let i = 0; i < 10; i++) { const a = i / 10 * Math.PI * 2 - Math.PI / 2, rr = i % 2 ? r * 0.45 : r; og.lineTo(Math.cos(a) * rr, Math.sin(a) * rr); } og.closePath(); og.fill(); og.stroke(); og.restore(); };
+  const dizzy = (c, t) => { const h = headC(c).add(V(0, 0.36, 0)); for (let j = 0; j < 3; j++) { const a = t * 6 + j * 2.1, q = proj(h.clone().add(V(Math.cos(a) * 0.32, 0.05 * Math.sin(a), Math.sin(a) * 0.32))); if (q.ok) star5(q.x, q.y, q.m(0.07), '#ffd21f'); } };
+  const sparkle = (c, t) => { const q = proj(headC(c)); if (!q.ok) return; for (let j = 0; j < 5; j++) { const a = j / 5 * Math.PI * 2 + 0.5, s = Math.max(0, Math.sin(t * 7 + j * 1.9)), x = q.x + Math.cos(a) * q.m(0.48), y = q.y + Math.sin(a) * q.m(0.42) - q.m(0.1), r = q.m(0.07) * s;
+      og.save(); og.translate(x, y); og.fillStyle = j % 2 ? '#ffe14d' : '#ffffff'; og.strokeStyle = INK; og.lineWidth = 3 * K; og.beginPath(); for (let i = 0; i < 8; i++) { const b = i / 8 * Math.PI * 2, rr = i % 2 ? r * 0.25 : r; og.lineTo(Math.cos(b) * rr, Math.sin(b) * rr); } og.closePath(); og.fill(); og.stroke(); og.restore(); } };
+  const shiverLines = (c, t) => { if (!c.root.visible) return; const q = proj(c.root.position.clone().add(V(0, 0.75, 0))); if (!q.ok) return; og.save(); og.strokeStyle = INK; og.lineWidth = 5 * K; og.lineCap = 'round';
+    for (const sd of [-1, 1]) for (let j = 0; j < 2; j++) { const x = q.x + sd * (q.m(0.42 + 0.1 * j) + 3 * K * Math.sin(t * 60 + j)), r = q.m(0.12); og.beginPath(); og.arc(x - sd * r, q.y - q.m(0.15 * j), r, sd > 0 ? -0.7 : Math.PI - 0.7, sd > 0 ? 0.7 : Math.PI + 0.7); og.stroke(); } og.restore(); };
+  const speed = (c, t) => { const P = c.root.position.clone().add(V(0, 0.7, 0)), q = proj(P), q2 = proj(P.clone().addScaledVector(dirW(c, 0, 0, 1), -0.6)); if (!q.ok || !q2.ok) return; let dx = q2.x - q.x, dy = q2.y - q.y; const L = Math.hypot(dx, dy) || 1; dx /= L; dy /= L;
+    og.save(); og.strokeStyle = 'rgba(255,255,255,0.9)'; og.lineCap = 'round'; for (let j = 0; j < 6; j++) { const o = (j - 2.5) * q.m(0.12), s0 = q.m(0.35) + (j % 2) * q.m(0.1), len = q.m(0.5 + 0.25 * ((j * 7) % 3)) * (0.8 + 0.2 * Math.sin(t * 20 + j));
+      const x0 = q.x + dx * s0 - dy * o, y0 = q.y + dy * s0 + dx * o; og.lineWidth = 9 * K; og.strokeStyle = INK; og.beginPath(); og.moveTo(x0, y0); og.lineTo(x0 + dx * len, y0 + dy * len); og.stroke(); og.lineWidth = 5 * K; og.strokeStyle = '#ffffff'; og.stroke(); } og.restore(); };
+  const dust = (P, t0, t) => { const u = (t - t0) / 0.7; if (u < 0 || u > 1) return; for (let j = 0; j < 6; j++) { const a = j / 6 * Math.PI * 2, q = proj(P.clone().add(V(Math.cos(a) * (0.2 + 0.5 * u), 0.1 + 0.15 * u, Math.sin(a) * (0.2 + 0.5 * u) * 0.5))); if (q.ok) { og.globalAlpha = 1 - u; og.fillStyle = '#e9dcc4'; og.strokeStyle = INK; og.lineWidth = 4 * K; og.beginPath(); og.arc(q.x, q.y, q.m(0.08 + 0.1 * u), 0, 7); og.fill(); og.stroke(); og.globalAlpha = 1; } } };
+  const fxPass = (t) => {
+    const W3 = V(-3.2, FY + 1.6, ZB + 0.45), W6 = V(-6.2, FY + 1.6, ZB + 0.45);
+    if (t < B.pitch && t > B.yank + 0.3) [THUA, TI, ...XS, ...(t < B.mock ? [DAVE] : [])].forEach(c => shiverLines(c, t));
+    if (t > B.open + 0.4) [THUA, TI, XR, XY].forEach(c => shiverLines(c, t));
+    for (const [c, t0] of TAKES) emanata(c, t0 + 0.05, t);
+    if (t > B.inface - 0.2 && t < B.rxn + 0.6) steam(DAVE, t);
+    if ((t > B.mock + 0.1 && t < B.inface - 0.15) || (t > B.morn + 0.1 && t < B.open - 0.6)) speed(DAVE, t);
+    if (t > B.blank + 0.1 && t < B.aud) sweat(DAVE, t);
+    if (t > B.stumble + 1.1 && t < B.morn) dizzy(DAVE, t);
+    if (t > B.open + 0.8 && t < B.kev) sparkle(DAVE, t);
+    if (t > B.kev + 0.6) sparkle(KEV, t);
+    burst(W3, B.yank + 0.02, t, 'YANK!', '#7fd4ff'); burst(W3, B.slam1, t, 'SLAM!'); burst(W6, B.slam2, t, 'SLAM!');
+    burst(V(DX + 0.75, FY + 0.2, -24.9), B.blank + 0.55, t, 'CLANK!', '#d9e2ea'); burst(GREEN.root.position.clone().add(V(0, 0.3, 0.6)), B.plant + 0.45, t, 'THUD!', '#ffb02e'); dust(GREEN.root.position.clone().add(V(0, 0, 0.7)), B.plant + 0.45, t);
+    if (DAVE.root.visible) { burst(headC(DAVE).add(V(0.15, 0.4, 0)), B.ana + 0.6, t, 'FLOMP!', '#8fdc6a'); burst(headC(DAVE).add(V(0, 0.3, -0.2)), B.stumble + 1.1, t, 'BONK!'); }
+    burst(W3, B.open + 0.02, t, 'WHOOSH!', '#7fd4ff'); };
+  // ---- word-by-word captions drawn in frame (pop in, keywords in colour) ----
+  const WORDS = T.lines.flatMap(l => l.words);
+  const KEYW = /JANUARY|FREEZING|PENGUINS|THREE|ELEVEN|WINDOW|FORGOT|CARBON|DIOXIDE|FOURTEEN|HUNDRED|HALF|HARVARD|SLEEPING|MATH|HIMSELF|BREATH|EVERY/;
+  const caption = (t) => { let i = -1; for (let k = 0; k < WORDS.length; k++) if (t >= WORDS[k].t - 0.03) i = k; if (i < 0) return; const w = WORDS[i], nx = WORDS[i + 1], end = nx ? Math.min(nx.t - 0.03, w.t + 0.9) : w.t + 0.9; if (t > end) return;
+    const txt = w.w.replace(/["“”.,…!?]/g, '').toUpperCase(), hot = KEYW.test(txt), p = backOut((t - w.t + 0.03) / 0.13), sz = hot ? 128 : 112;
+    og.save(); og.translate(WW / 2, HH * 0.72); og.scale(K * (0.65 + 0.35 * p), K * (0.65 + 0.35 * p)); og.rotate(hot ? -0.05 : 0); og.font = `${sz}px Anton, sans-serif`; og.textAlign = 'center'; og.textBaseline = 'middle'; og.lineJoin = 'round';
+    const k = Math.min(1, 940 / og.measureText(txt).width); og.scale(k, k); og.lineWidth = sz * 0.22; og.strokeStyle = '#111'; og.strokeText(txt, 0, 6); og.strokeText(txt, 0, 0); og.fillStyle = hot ? '#ffe14d' : '#ffffff'; og.fillText(txt, 0, 0); og.restore(); };
+
   const frame = (t) => {
     T0 = t; shakeAmt = 0;
-    resetScene(); OUTF.forEach(c => (c.root.visible = false)); ex.forEach(c => (c.root.visible = false)); ALL.forEach(c => c.root.scale.setScalar(SC));
+    resetScene(); OUTF.forEach(c => (c.root.visible = false)); ex.forEach(c => (c.root.visible = false)); ALL.forEach(c => { c.root.scale.setScalar(SC); c._walk = 0; c._talk = 0; c._hs ??= c.head.scale.clone(); c.head.scale.copy(c._hs); });
     [bag, mug, stick].forEach(o => (o.visible = false)); bubbles.concat(vapor, pops, zs).forEach(b => (b.visible = false)); papers.forEach(p => (p.visible = false));
     dof(0, 0); haze(0);
     const morning = t >= B.morn, winter = t < B.pitch;
@@ -224,7 +298,7 @@ export default async function story(ctx) {
 
     if (winter) {
       // ===== morning, windows open =====
-      const coldK = 1;
+      const coldK = 1; extras(t, t > B.yank + 0.3);
       // coworkers at their desks
       const shiver = t > B.yank + 0.3;
       [[THUA, DESK.thua], [TI, DESK.ti]].forEach(([c, x], i) => { stand(c, x, CHZ, 0.15 * (i ? -1 : 1), t + i); if (shiver) { hug(c, t + i * 0.3); mood(c, Math.sin(t * 38 + i) > 0 ? 'cold_t' : 'cold', t); } else { type(c, t + i); mood(c, 'calm', t); } chill(c, shiver ? coldK : 0); });
@@ -236,7 +310,7 @@ export default async function story(ctx) {
         else { const sip = t > B.reply && t < B.reply + 1.0 ? Math.sin(seg(t, B.reply, B.reply + 1.0) * Math.PI) : 0; holdMug(KEV, t, sip);
           if (t >= wt('reply', 'trust') - 0.05 && t < E('reply') + 0.1) speak(KEV, t, 'smugt', 'smug'); else mood(KEV, t < B.mock ? 'calm' : 'smug', t); }
         chill(KEV, 0.2); }
-      else { stand(KEV, DESK.kev, CHZ, 0.6, t); holdMug(KEV, t, 0); mood(KEV, 'smug', t); }
+      else { stand(KEV, -5.1, CHZ + 0.1, 0.6, t); holdMug(KEV, t, 0); mood(KEV, 'smug', t); }
       // Dave
       if (t < B.mock) { stand(DAVE, DESK.dave, CHZ, 0, t); if (shiver) { hug(DAVE, t); mood(DAVE, Math.sin(t * 41) > 0 ? 'cold_t' : 'cold', t); } else { type(DAVE, t); mood(DAVE, 'calm', t); } chill(DAVE, shiver ? coldK : 0); }
       else if (t < B.shut) { const P = [V(1.4, 0, -24.15), V(-1.85, 0, -24.6)], a = walk(DAVE, P, B.mock + 0.1, B.inface - 0.15, t, 1.7); chill(DAVE, 0.7);
@@ -268,7 +342,7 @@ export default async function story(ctx) {
       // ===== 3 pm pitch; room sealed, air goes stale =====
       haze(Math.min(0.78, 0.12 + seg(t, B.pitch, B.ppm) * 0.35 + seg(t, B.ppm, B.study) * 0.3));
       const sleepy = seg(t, B.blank + 0.6, B.blank + 1.6);
-      const AUD = [[KEV, 0.35, -24.05], [THUA, 1.0, -23.75], [TI, 3.45, -23.75], [GREEN, 4.15, -24.1]];
+      const AUD = [[KEV, 0.35, -24.05], [THUA, 1.0, -23.75], [TI, 3.45, -23.75], [GREEN, 4.15, -24.1], [XR, -0.35, -24.55], [XP, 2.45, -23.4], [XT, 4.8, -24.65], [XY, 5.1, -23.7]];
       AUD.forEach(([c, x, z], i) => { stand(c, x, z, yawTo(x, z, DX + 0.6, ZB + 0.75), t + i);
         if (c === KEV) { holdMug(KEV, t, t > B.plant + 0.9 && t < B.plant + 2.0 ? Math.sin(seg(t, B.plant + 0.9, B.plant + 2.0) * Math.PI) : 0); mood(KEV, 'smug', t); return; }
         if (t < B.blank) { mood(c, 'listen', t); headTurn(c, 0, 0.12 * Math.max(0, Math.sin(t * 3 + i))); return; }   // nodding along
@@ -308,6 +382,7 @@ export default async function story(ctx) {
     }
     else {
       // ===== next morning: payoff =====
+      extras(t, t > B.open + 0.4);
       const P = [V(1.6, 0, -21.6), V(0.15, 0, -22.1), V(-0.2, 0, -24.2)];
       [[THUA, DESK.thua], [TI, DESK.ti]].forEach(([c, x], i) => { stand(c, x, CHZ, 0.15, t + i); if (t < B.open + 0.4) { type(c, t + i); mood(c, 'calm', t); } else { hug(c, t + i * 0.3, 0.6); mood(c, Math.sin(t * 38 + i) > 0 ? 'cold_t' : 'cold', t); chill(c, 0.6); } });
       const walkEnd = B.open - 0.6;
@@ -326,6 +401,7 @@ export default async function story(ctx) {
       else { const u = eio(seg(t, B.kev, DUR)), h = headC(KEV); cam(V(KP.x + 0.15, 1.45, KP.z + lerp(1.9, 1.55, u)), h.clone().add(V(0, -0.02, 0)), 38); dof(lerp(1.9, 1.55, u), 0.012); }   // M Kevin to camera: toast
     }
 
+    toonPass(t);
     for (const sh of SHAFTS) { const c = camera.position; sh.visible = !(Math.abs(c.x - sh.userData.x) < 1.7 && c.z < ZB + 5.8 && c.y < FY + 3.3); }
     ALL.forEach(c => SR.updateLimbs(c));
     const f = V(0, 1, -23); sun.target.position.copy(f); sun.position.copy(f).addScaledVector(SUNDIR, 60); const sc = sun.shadow.camera; sc.left = sc.bottom = -12; sc.right = sc.top = 12; sc.near = 1; sc.far = 140; sc.updateProjectionMatrix();
@@ -342,6 +418,7 @@ export default async function story(ctx) {
     graph(wt('study', 'harvard') + 0.2, B.ana, t);
     card('NEXT MORNING', B.morn, wt('end', 'dave') + 0.2, t, 300, 120);
     card('TOLD YOU.', B.kev + 0.7, DUR + 1, t, 210, 150, '#ffe36b', -0.05);
+    fxPass(t); caption(t);
     flash(t, B.yank + 0.02); flash(t, B.open + 0.02); flash(t, B.morn, 0.18);
     return out.toDataURL('image/jpeg', 0.92);
   };

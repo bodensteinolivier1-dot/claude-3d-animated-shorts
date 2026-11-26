@@ -703,7 +703,7 @@ if (Q.has('viewer')) { if (Q.has('skit') || Q.has('story')) window.ready = false
     ui.style.display = 'none'; window.ready = false;
     const mod = await import(`./story_${Q.get('story')}.js`);
     await mod.default({ THREE, SR, Q, scene, camera, renderer, canvas, post, U, hemi, sun, SUNDIR, WW, HH, O: OFF_O, Z, FY, OUTF, thua, chief, ti, ex, ALL,
-      V, clamp, eio, ease, lerp, place, idle, face, arm, Lw, dirW, look, headC, yawTo, hips, headTurn, waveArms, resetScene, setLook, put: OFF_PUT,
+      V, clamp, eio, ease, lerp, place, idle, face, arm, Lw, dirW, look, headC, yawTo, hips, headTurn, waveArms, resetScene, setLook, put: OFF_PUT, base,
       addFace: (k, f) => { const FH = { lidEyes, ringEyes, happyEyes, brows, mOpen, mO, mFlat, mFrown, mFrownS, mSmile, mWavy, sweat, IK, EX, LW }; FT[k] = SR.faceTex(big(g => f(g, FH)), false, true); FTC[k] = SR.faceTex(big(g => { f(g, FH); moust(g); }), false, true); } });
   } else if (!Q.has('skit')) loop(); else {
   // ---------- 10 s skit "Trả lời tất cả" (owner 2026-11-10: "làm thử 1 kịch bản nhẹ nhẹ 10s") ----------
