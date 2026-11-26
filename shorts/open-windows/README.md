@@ -1,10 +1,10 @@
 # He Opened Every Window in January
 
-41 s vertical short in the RicksClips story formula, built with this repo's 3D engine.
+~44 s vertical short in the RicksClips story formula, built with this repo's 3D engine.
 
 odd act (windows open in winter) → mockery ("We're not penguins") → reply ("You'll thank me at three") →
 disaster (Dave blanks at his 3 pm pitch) → science (CO₂ passes 1,400 ppm in a sealed room; Harvard COGfx study, Allen et al. 2016:
-cognitive scores ~50% lower at ~1,400 ppm) → analogy (head in a sleeping bag doing math) → loop line.
+cognitive scores ~50% lower at ~1,400 ppm) → analogy (head in a sleeping bag doing math) → payoff (Dave opens every window himself) → "TOLD YOU." outro.
 
 ## Rebuild
 ```bash
@@ -15,5 +15,10 @@ cp timing.json ../../engine/film/story_windows.json
 CAP_Y=0.74 python3 ../../tools/captions.py                                           # cap/overlay.mov
 cd ../../engine && XQ="&viewer=1&story=windows" node render.cjs out/windows_raw.mp4 720 1280 30   # software GL: 720p, mix.sh upscales
 ```
-Then mix (see `mix.sh`). Scene code: `engine/story_windows.js`.
+Then the soundtrack and mix:
+```bash
+SFX_OUT=$PWD/sfx.json ...render.cjs...   # or copy engine/out/sfx.json (the chunk script writes it)
+python3 soundtrack.py sfx.json            # original synth music bed + ~20 synthesized sound effects (scipy)
+./mix.sh                                  # voice + ducked music + sfx + wind + captions
+``` Scene code: `engine/story_windows.js`.
 Kokoro model files: github.com/thewh1teagle/kokoro-onnx releases (model-files-v1.0).

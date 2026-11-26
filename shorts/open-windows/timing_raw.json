@@ -1,5 +1,5 @@
 {
- "duration": 44.57,
+ "duration": 46.228,
  "lines": [
   {
    "id": "hook",
@@ -574,10 +574,10 @@
    ]
   },
   {
-   "id": "loop",
-   "text": "So the next morning, Dave walked straight past Kevin, and...",
+   "id": "end",
+   "text": "So the next morning, Dave walked straight past Kevin... and opened every window himself.",
    "start": 40.408,
-   "end": 43.75,
+   "end": 45.408,
    "words": [
     {
      "w": "So",
@@ -585,39 +585,55 @@
     },
     {
      "w": "the",
-     "t": 40.663
+     "t": 40.638
     },
     {
      "w": "next",
-     "t": 40.919
+     "t": 40.869
     },
     {
      "w": "morning,",
-     "t": 41.175
+     "t": 41.099
     },
     {
      "w": "Dave",
-     "t": 41.627
+     "t": 41.507
     },
     {
      "w": "walked",
-     "t": 42.079
+     "t": 41.915
     },
     {
      "w": "straight",
-     "t": 42.531
+     "t": 42.323
     },
     {
      "w": "past",
-     "t": 42.787
+     "t": 42.553
     },
     {
-     "w": "Kevin,",
-     "t": 43.042
+     "w": "Kevin...",
+     "t": 42.784
     },
     {
-     "w": "and...",
-     "t": 43.494
+     "w": "and",
+     "t": 43.192
+    },
+    {
+     "w": "opened",
+     "t": 43.422
+    },
+    {
+     "w": "every",
+     "t": 44.007
+    },
+    {
+     "w": "window",
+     "t": 44.592
+    },
+    {
+     "w": "himself.",
+     "t": 45.0
     }
    ]
   }

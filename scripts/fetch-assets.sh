@@ -17,10 +17,12 @@ python3 - <<'PY'
 import json, os, urllib.request
 UA = {'User-Agent': 'claude-3d-animated-shorts/1.0'}
 get = lambda u: urllib.request.urlopen(urllib.request.Request(u, headers=UA), timeout=60).read()
-ids = ['metal_office_desk','modern_arm_chair_01','classic_laptop','office_notepads','clipboard','desk_lamp_arm_01','potted_plant_01','potted_plant_02','potted_plant_04','pachira_aquatica_01','drawer_cabinet','Shelf_01','book_encyclopedia_set_01','hanging_picture_frame_01','hanging_picture_frame_02','CoffeeCart_01','mounted_fluorescent_lights','modern_ceiling_lamp_01','sofa_02','modern_coffee_table_01','side_table_01','mid_century_lounge_chair','ceiling_fan','fire_alarm','projector_screen','alarm_clock_01','ceramic_vase_01','painted_wooden_shelves']
+ids = ['metal_office_desk','modern_arm_chair_01','classic_laptop','office_notepads','clipboard','desk_lamp_arm_01','potted_plant_01','potted_plant_02','potted_plant_04','pachira_aquatica_01','drawer_cabinet','Shelf_01','book_encyclopedia_set_01','hanging_picture_frame_01','hanging_picture_frame_02','CoffeeCart_01','mounted_fluorescent_lights','modern_ceiling_lamp_01','sofa_02','modern_coffee_table_01','side_table_01','mid_century_lounge_chair','ceiling_fan','fire_alarm','projector_screen','alarm_clock_01','ceramic_vase_01','painted_wooden_shelves','metal_trash_can','cardboard_box_01','binder_notebook','steel_frame_shelves_01','standing_picture_frame_01','wall_clock','hanging_picture_frame_03']
 base = 'assets/props/polyhaven'
 for i in ids:
-    g = json.loads(get(f'https://api.polyhaven.com/files/{i}'))['gltf']['1k']['gltf']; os.makedirs(f'{base}/{i}', exist_ok=True)
+    j = json.loads(get(f'https://api.polyhaven.com/files/{i}'))
+    if 'gltf' not in j: print('skip (no glTF)', i); continue
+    g = j['gltf']['1k']['gltf']; os.makedirs(f'{base}/{i}', exist_ok=True)
     open(f'{base}/{i}/{i}.gltf', 'wb').write(get(g['url']))
     for rel, v in g.get('include', {}).items():
         p = os.path.join(base, i, rel); os.makedirs(os.path.dirname(p), exist_ok=True); open(p, 'wb').write(get(v['url']))

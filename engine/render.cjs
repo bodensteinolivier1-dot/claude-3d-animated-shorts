@@ -12,6 +12,7 @@ const CHROME = process.env.CHROME || ['/Applications/Google Chrome.app/Contents/
   const page = await browser.newPage(); page.on('requestfailed', r => console.log('FAIL', r.url())); page.on('response', r => { if (r.status() >= 400) console.log('HTTP', r.status(), r.url()); }); page.on('pageerror', e => console.log('PAGE ERROR', e.message)); page.on('console', m => console.log('console:', m.text()));
   await page.goto(`http://127.0.0.1:${port}/${process.env.PAGE || "index.html"}?w=${w}&h=${h}&look=${process.env.LOOK || 'c'}&style=${process.env.STYLE || 'ph'}${process.env.XQ || ''}`); await page.waitForFunction('window.ready', { timeout: 180000 });
   fs.mkdirSync(path.join(ROOT, path.dirname(OUT)), { recursive: true });
+  if (process.env.SFX_OUT) fs.writeFileSync(process.env.SFX_OUT, JSON.stringify(await page.evaluate(() => window.SFX || []), null, 1));   // story sound cues
   if (stills.length) {
     for (const s of stills) { const d = await page.evaluate(t => window.frame(t), +s); fs.writeFileSync(path.join(ROOT, path.dirname(OUT), `still-${s}.jpg`), Buffer.from(d.split(',')[1], 'base64')); }
   } else {

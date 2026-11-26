@@ -582,7 +582,7 @@ if (Q.has('viewer')) { if (Q.has('skit') || Q.has('story')) window.ready = false
   const CAST = [...OUTF, thua, chief, ti, ...ex], Z = -20, X0 = -((CAST.length - 1) * 1.05) / 2;
   const POS = CAST.map((c, i) => V(X0 + i * 1.05, 0, Q.get('set') !== 'track' ? Z + 2.4 : Z));   // office/home: people stand in front of the furniture
   // office set (owner 2026-11-10: "đổi khung cảnh về văn phòng đi"): hide the outdoor world, build a bright cartoon office around the lineup
-  const OFFICE = Q.get('set') !== 'track', FY = 0.4; let OFF_O = null;
+  const OFFICE = Q.get('set') !== 'track', FY = 0.4; let OFF_O = null, OFF_PUT = null;
   if (OFFICE) { const keep = new Set([hemi, sun, sun.target]); ALL.forEach(c => { keep.add(c.root); c.dyn?.forEach(d => d.mesh?.parent && keep.add(d.mesh.parent)); });
     scene.children.forEach(o => { if (!keep.has(o)) o.visible = false; }); scene.fog.near = 400; scene.fog.far = 4000;
     const O = new THREE.Group(); scene.add(O); OFF_O = O; const tm = c => new THREE.MeshStandardMaterial({ color: c, roughness: 0.75, metalness: 0 });   // real shading for the set (owner 2026-11-10: "màu sắc chẳng chân thật")
@@ -638,7 +638,7 @@ if (Q.has('viewer')) { if (Q.has('skit') || Q.has('story')) window.ready = false
         if (!o.noInk && Q.get('propink') === '1') { const h = new THREE.Mesh(m.geometry, hull(0.012 / k)); m.add(h); } });   // props: no ink line, real-looking like the RicksClips worlds
       obj.name = name; obj.scale.setScalar(k); obj.rotation.y = ry; obj.position.set(x, (o.y ?? FY), z); O.add(obj);
       if (kit === 'polyhaven') { obj.updateMatrixWorld(true); const bb = new THREE.Box3().setFromObject(obj), c2 = bb.getCenter(V(0, 0, 0)); obj.position.x += x - c2.x; obj.position.z += z - c2.z; obj.position.y += (o.y ?? FY) - bb.min.y; }   // footprint centred on (x, z), sitting on the floor/desk
-      return obj; };
+      return obj; }; OFF_PUT = put;
     const SET = Q.get('set') || 'office', ZD = Z - 2.9;
     if (SET === 'office') {   // Poly Haven CC0 scans (desks, chairs, lamps, plants, shelves) + Kenney monitors
       for (const [i, x] of [-6.2, -2.1, 2.1, 6.2].entries()) { await put('polyhaven', 'metal_office_desk', x, ZD, 0); await put('kenney', i === 1 ? 'laptop' : 'computerScreen', x, ZD, 0, { y: FY + 0.66 });
@@ -703,7 +703,8 @@ if (Q.has('viewer')) { if (Q.has('skit') || Q.has('story')) window.ready = false
     ui.style.display = 'none'; window.ready = false;
     const mod = await import(`./story_${Q.get('story')}.js`);
     await mod.default({ THREE, SR, Q, scene, camera, renderer, canvas, post, U, hemi, sun, SUNDIR, WW, HH, O: OFF_O, Z, FY, OUTF, thua, chief, ti, ex, ALL,
-      V, clamp, eio, ease, lerp, place, idle, face, arm, Lw, dirW, look, headC, yawTo, hips, headTurn, waveArms, resetScene, setLook });
+      V, clamp, eio, ease, lerp, place, idle, face, arm, Lw, dirW, look, headC, yawTo, hips, headTurn, waveArms, resetScene, setLook, put: OFF_PUT,
+      addFace: (k, f) => { const FH = { lidEyes, ringEyes, happyEyes, brows, mOpen, mO, mFlat, mFrown, mFrownS, mSmile, mWavy, sweat, IK, EX, LW }; FT[k] = SR.faceTex(big(g => f(g, FH)), false, true); FTC[k] = SR.faceTex(big(g => { f(g, FH); moust(g); }), false, true); } });
   } else if (!Q.has('skit')) loop(); else {
   // ---------- 10 s skit "Trả lời tất cả" (owner 2026-11-10: "làm thử 1 kịch bản nhẹ nhẹ 10s") ----------
   ui.style.display = 'none';
