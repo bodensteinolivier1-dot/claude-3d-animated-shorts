@@ -8,3 +8,5 @@ engine/film/*.otf
 *.wav
 .DS_Store
 engine/assets/props/polyhaven/
+shorts/*/cap/
+shorts/*/out/
